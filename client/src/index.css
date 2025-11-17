@@ -1,0 +1,8 @@
+@import "tailwindcss";
+
+body {
+  background-image: url('https://placeimg.com/1000/480/arch');
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+}
