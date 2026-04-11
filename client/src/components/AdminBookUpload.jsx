@@ -507,11 +507,9 @@ const AdminBookUpload = () => {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <input type="text" name="title" placeholder="Title*" value={singleInput.title} onChange={handleSingleChange} required className="p-3 border border-gray-300 rounded-lg focus:ring-red-500 focus:border-red-500" />
                         <input type="text" name="author" placeholder="Author" value={singleInput.author} onChange={handleSingleChange} className="p-3 border border-gray-300 rounded-lg focus:ring-red-500 focus:border-red-500" />
-                        {/* <input type="text" name="isbn" placeholder="ISBN (Unique)" value={singleInput.isbn} onChange={handleSingleChange} className="p-3 border border-gray-300 rounded-lg focus:ring-red-500 focus:border-red-500" /> */}
-                        {/* <input type="text" name="category" placeholder="Category" value={singleInput.category} onChange={handleSingleChange} className="p-3 border border-gray-300 rounded-lg focus:ring-red-500 focus:border-red-500" /> */}
                         
-                        <input type="number" name="quantity" placeholder="Total Quantity*" value={singleInput.quantity} onChange={handleSingleChange} required min="1" className="p-3 border border-gray-300 rounded-lg focus:ring-red-500 focus:border-red-500" />
-                        <input type="number" name="available" placeholder="Available*" value={singleInput.available} onChange={handleSingleChange} required min="0" max={singleInput.quantity} className="p-3 border border-gray-300 rounded-lg focus:ring-red-500 focus:border-red-500" />
+                        <input type="number" name="totalCopies" placeholder="Total Quantity*" value={singleInput.totalCopies} onChange={handleSingleChange} required min="1" className="p-3 border border-gray-300 rounded-lg focus:ring-red-500 focus:border-red-500" />
+                        <input type="number" name="copiesAvailable" placeholder="Available*" value={singleInput.copiesAvailable} onChange={handleSingleChange} required min="0" max={singleInput.totalCopies} className="p-3 border border-gray-300 rounded-lg focus:ring-red-500 focus:border-red-500" />
                     </div>
                 )
       

@@ -172,8 +172,8 @@ router.post('/', protect, authorize('admin'), async (req, res) => {
     const data = req.body;
     
     // Production-level validation for essential fields
-    if (!data.title || !data.author || !data.quantity || data.quantity < 1) {
-        return res.status(400).json({ msg: 'Please include title, author, and a valid quantity.' });
+    if (!data.title || !data.author || !data.totalCopies || data.totalCopies < 1) {
+        return res.status(400).json({ msg: 'Please include title, author, and a valid totalCopies count.' });
     }
 
     try {

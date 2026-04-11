@@ -26,11 +26,22 @@ app.use("/api/issues", issueRoutes);
 // add health test route
 app.get("/api/health", (req, res) => res.send("API is running..."));
 
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 8888;
 
 mongoose.connect(process.env.MONGO_URI)
   .then(() => {
     console.log("✅ MongoDB connected");
-    app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
+    const server = app.listen(PORT, "0.0.0.0", () => {
+      console.log(`🚀 Server running on port ${PORT}`);
+    });
+    server.on('error', (err) => {
+      if (err.code === 'EACCES') {
+        console.error(`❌ Port ${PORT} requires elevated privileges or is restricted.`);
+      } else if (err.code === 'EADDRINUSE') {
+        console.error(`❌ Port ${PORT} is already in use.`);
+      } else {
+        console.error(`❌ Server Error: ${err.message}`);
+      }
+    });
   })
-  .catch(err => console.log("❌ DB Error:", err.message));
+  .catch(err => console.error("❌ DB Error:", err.message));
