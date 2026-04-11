@@ -325,7 +325,7 @@ router.post("/request/:bookId", protect, async (req, res) => {
 // --------------------
 router.put("/approve/:id", protect, authorize("admin"), async (req, res) => {
   try {
-    const issue = await Issue.findById(req.params.id).populate("book");
+    const issue = await Issue.findById(req.params.id).populate("book student");
     if (!issue) return res.status(404).json({ msg: "Issue not found" });
 
     issue.status = "issued";
@@ -347,7 +347,7 @@ router.put("/approve/:id", protect, authorize("admin"), async (req, res) => {
 // --------------------
 router.put("/return/:id", protect, authorize("admin"), async (req, res) => {
   try {
-    const issue = await Issue.findById(req.params.id).populate("book");
+    const issue = await Issue.findById(req.params.id).populate("book student");
     if (!issue) return res.status(404).json({ msg: "Issue not found" });
 
     if (issue.status !== "issued") {
@@ -383,7 +383,7 @@ router.put("/return/:id", protect, authorize("admin"), async (req, res) => {
 // --------------------
 router.put("/fine/:id", protect, authorize("admin"), async (req, res) => {
   try {
-    const issue = await Issue.findById(req.params.id);
+    const issue = await Issue.findById(req.params.id).populate("student book");
     if (!issue) return res.status(404).json({ msg: "Issue not found" });
 
     issue.paidAmount = issue.fine; // full payment

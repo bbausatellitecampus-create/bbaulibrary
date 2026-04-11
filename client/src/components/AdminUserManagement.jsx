@@ -99,8 +99,9 @@ const AdminUserManagement  = () => {
                     <thead className="bg-gray-50">
                         <tr>
                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name / Email</th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Library Card</th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Dept / Sem</th>
                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Role</th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Account ID</th>
                             <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                         </tr>
                     </thead>
@@ -111,13 +112,16 @@ const AdminUserManagement  = () => {
                                     <div className="text-sm font-medium text-gray-900">{user.name}</div>
                                     <div className="text-sm text-gray-500">{user.email}</div>
                                 </td>
+                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                    {user.libraryCardNo || 'N/A'}
+                                </td>
+                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                    {user.department || 'N/A'} / {user.semester || 'N/A'}
+                                </td>
                                 <td className="px-6 py-4 whitespace-nowrap">
                                     <span className={`px-3 py-1 inline-flex text-xs leading-5 rounded-full border ${getRoleClasses(user.role)}`}>
                                         {user.role.toUpperCase()}
                                     </span>
-                                </td>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 font-mono">
-                                    {user._id}
                                 </td>
                                 <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2 text-center">
                                     {/* Role Change Dropdown */}

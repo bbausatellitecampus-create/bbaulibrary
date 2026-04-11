@@ -11,12 +11,29 @@ const router = express.Router();
 // Register
 router.post("/register", async (req, res) => {
   try {
-    const { name, email, password, role } = req.body;
+    const { name, email, password, libraryCardNo, phone, department, semester, role } = req.body;
+    
+    // Server-side validation check
+    if (!name || !email || !password || !libraryCardNo || !phone || !department || !semester) {
+       return res.status(400).json({ error: "All fields are required" });
+    }
+
     const hashed = await bcrypt.hash(password, 10);
-    const user = new User({ name, email, password: hashed, role });
+    const user = new User({ 
+      name, 
+      email, 
+      password: hashed, 
+      libraryCardNo, 
+      phone, 
+      department, 
+      semester, 
+      role 
+    });
     await user.save();
+    console.log(`User registered: ${email}`);
     res.json(user);
   } catch (err) {
+    console.error("Registration Error:", err.message);
     res.status(400).json({ error: err.message });
   }
 });
@@ -85,7 +102,7 @@ router.delete('/:id', protect, authorize('admin'), async (req, res) => {
     try {
         // PRODUCTION CHECK: Prevent deletion if user has an active issued book
         const activeIssue = await IssuedBook.findOne({
-            user: req.params.id,
+            student: req.params.id, // Corrected from 'user' to 'student'
             status: 'issued'
         });
 

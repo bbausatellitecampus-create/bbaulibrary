@@ -861,6 +861,11 @@ const AdminIssueManagement = () => {
               <div className="flex-1 min-w-[250px]">
                 <p className="text-lg font-bold text-gray-900">{issue.book?.title || "Book Missing"}</p>
                 <p className="text-sm text-gray-600 mb-2">User: {issue.student?.name || "Deleted User"}</p>
+                <div className="flex flex-wrap gap-x-4 gap-y-1 mb-2 text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                   <span>Dept: {issue.student?.department || "N/A"}</span>
+                   <span>Sem: {issue.student?.semester || "N/A"}</span>
+                   <span>Card: {issue.student?.libraryCardNo || "N/A"}</span>
+                </div>
 
                 <div className="grid grid-cols-2 text-sm text-gray-500 gap-1">
                   <p

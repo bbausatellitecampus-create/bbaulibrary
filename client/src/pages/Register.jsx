@@ -7,6 +7,10 @@ export default function Register() {
         name: '',
         email: '',
         password: '',
+        libraryCardNo: '',
+        phone: '',
+        department: '',
+        semester: '',
         role: 'student', // Default role for registration
     });
     const [message, setMessage] = useState('');
@@ -20,12 +24,15 @@ export default function Register() {
         e.preventDefault();
         setMessage('Registering...');
         try {
-            // Note: The backend route is /api/auth/register
+            // Note: The backend route is /api/users/register
             const res = await API.post('/api/users/register', formData);
-            setMessage(res.data.msg + ' Redirecting to login...');
-            navigate('/login');
+            setMessage('Registration successful! Redirecting to login...');
+            setTimeout(() => {
+                navigate('/login');
+            }, 1500);
         } catch (err) {
-            setMessage(err.response?.data?.msg || 'Registration failed.');
+            // Backend sends error in { error: '...' }
+            setMessage(err.response?.data?.error || err.response?.data?.msg || 'Registration failed. Please check your details.');
         }
     };
 
@@ -48,6 +55,42 @@ export default function Register() {
                     name="email"
                     placeholder="College Email"
                     value={formData.email}
+                    onChange={handleChange}
+                    required
+                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-red-500 focus:border-red-500"
+                />
+                <input
+                    type="text"
+                    name="libraryCardNo"
+                    placeholder="Library Card Number"
+                    value={formData.libraryCardNo}
+                    onChange={handleChange}
+                    required
+                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-red-500 focus:border-red-500"
+                />
+                <input
+                    type="text"
+                    name="phone"
+                    placeholder="Phone Number"
+                    value={formData.phone}
+                    onChange={handleChange}
+                    required
+                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-red-500 focus:border-red-500"
+                />
+                <input
+                    type="text"
+                    name="department"
+                    placeholder="Department"
+                    value={formData.department}
+                    onChange={handleChange}
+                    required
+                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-red-500 focus:border-red-500"
+                />
+                <input
+                    type="text"
+                    name="semester"
+                    placeholder="Semester"
+                    value={formData.semester}
                     onChange={handleChange}
                     required
                     className="w-full p-3 border border-gray-300 rounded-lg focus:ring-red-500 focus:border-red-500"
