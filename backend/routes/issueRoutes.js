@@ -298,6 +298,7 @@
 
 
 const express = require("express");
+const mongoose = require("mongoose");
 const Issue = require("../models/Issue");
 const Book = require("../models/Book");
 const { protect, authorize } = require("../middleware/auth");
@@ -309,6 +310,17 @@ const router = express.Router();
 // --------------------
 router.post("/request/:bookId", protect, async (req, res) => {
   try {
+    // 1. Check if student already has a pending or active request for this book
+    const existingIssue = await Issue.findOne({
+      student: req.user.id,
+      book: req.params.bookId,
+      status: { $in: ["pending", "issued"] }
+    });
+
+    if (existingIssue) {
+      return res.status(400).json({ msg: "You already have a pending request or an active issue for this book." });
+    }
+
     const issue = new Issue({
       student: req.user.id,
       book: req.params.bookId,
@@ -324,21 +336,43 @@ router.post("/request/:bookId", protect, async (req, res) => {
 // Admin approves request
 // --------------------
 router.put("/approve/:id", protect, authorize("admin"), async (req, res) => {
+  const session = await mongoose.startSession();
+  session.startTransaction();
   try {
-    const issue = await Issue.findById(req.params.id).populate("book student");
-    if (!issue) return res.status(404).json({ msg: "Issue not found" });
+    const issue = await Issue.findById(req.params.id).session(session);
+    if (!issue) {
+      await session.abortTransaction();
+      return res.status(404).json({ msg: "Issue not found" });
+    }
+    if (issue.status !== "pending") {
+      await session.abortTransaction();
+      return res.status(400).json({ msg: "Request is already processed." });
+    }
+
+    // Atomic update to decrement copies ONLY if copiesAvailable > 0
+    const updatedBook = await Book.findOneAndUpdate(
+      { _id: issue.book, copiesAvailable: { $gt: 0 } },
+      { $inc: { copiesAvailable: -1 } },
+      { new: true, session }
+    );
+
+    if (!updatedBook) {
+      await session.abortTransaction();
+      return res.status(400).json({ msg: "No copies available to issue." });
+    }
 
     issue.status = "issued";
     issue.issueDate = new Date();
     issue.dueDate = new Date(Date.now() + 14 * 24 * 60 * 60 * 1000); // 14 days
-    await issue.save();
+    await issue.save({ session });
 
-    issue.book.copiesAvailable -= 1;
-    await issue.book.save();
-
+    await session.commitTransaction();
     res.json(issue);
   } catch (err) {
+    await session.abortTransaction();
     res.status(400).json({ error: err.message });
+  } finally {
+    session.endSession();
   }
 });
 

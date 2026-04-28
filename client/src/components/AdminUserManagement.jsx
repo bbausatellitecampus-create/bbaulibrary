@@ -12,8 +12,19 @@ const AdminUserManagement = () => {
 
     // Camera States
     const [showCamera, setShowCamera] = useState(false);
+    const [facingMode, setFacingMode] = useState("user");
     const [userToUpdatePhoto, setUserToUpdatePhoto] = useState(null);
     const webcamRef = useRef(null);
+
+    const toggleCamera = () => {
+        setFacingMode(prevMode => prevMode === "user" ? "environment" : "user");
+    };
+
+    const videoConstraints = {
+        width: 1280,
+        height: 720,
+        facingMode: facingMode
+    };
 
     const fetchUsers = async () => {
         setLoading(true);
@@ -56,14 +67,14 @@ const AdminUserManagement = () => {
     };
 
     const handleDelete = async (userId, userName) => {
-        const confirmed = window.confirm(`WARNING: Are you sure you want to DELETE ${userName}? This action cannot be undone.`);
+        const confirmed = window.confirm(`WARNING: Are you sure you want to DELETE ${userName}? This action cannot be undone. All data including profile photos will be purged.`);
         if (!confirmed) return;
 
         setMessage(`Deleting ${userName}...`);
         setError('');
         try {
             await API.delete(`/api/users/${userId}`);
-            setMessage(`Successfully deleted user ${userName}.`);
+            setMessage(`Successfully deleted user ${userName} and purged all associated data.`);
             fetchUsers();
         } catch (err) {
             setError(err.response?.data?.msg || 'Error deleting user.');
@@ -132,66 +143,76 @@ const AdminUserManagement = () => {
                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name / Email</th>
                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Library Card</th>
                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Dept / Sem</th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Expiry</th>
                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Role</th>
                             <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                         </tr>
                     </thead>
                     <tbody className="bg-white divide-y divide-gray-200">
-                        {filteredUsers.map(user => (
-                            <tr key={user._id} className="hover:bg-gray-50">
-                                <td className="px-6 py-4 whitespace-nowrap">
-                                    <div className="flex items-center">
-                                        <div className="flex-shrink-0 h-10 w-10 cursor-pointer" onClick={() => setSelectedPhoto(user.profilePhoto)}>
-                                            {user.profilePhoto ? (
-                                                <img className="h-10 w-10 rounded-full object-cover border border-gray-200 hover:opacity-80 transition duration-150" src={user.profilePhoto} alt="" title="Click to enlarge" />
-                                            ) : (
-                                                <div className="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center text-gray-500 font-bold border border-gray-200">
-                                                    {user.name.charAt(0)}
-                                                </div>
-                                            )}
+                        {filteredUsers.map(user => {
+                            const isExpired = user.expiryDate && new Date(user.expiryDate) < new Date();
+                            return (
+                                <tr key={user._id} className={`${isExpired ? 'bg-red-50' : 'hover:bg-gray-50'}`}>
+                                    <td className="px-6 py-4 whitespace-nowrap">
+                                        <div className="flex items-center">
+                                            <div className="flex-shrink-0 h-10 w-10 cursor-pointer" onClick={() => setSelectedPhoto(user.profilePhoto)}>
+                                                {user.profilePhoto ? (
+                                                    <img className="h-10 w-10 rounded-full object-cover border border-gray-200 hover:opacity-80 transition duration-150" src={user.profilePhoto} alt="" title="Click to enlarge" />
+                                                ) : (
+                                                    <div className="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center text-gray-500 font-bold border border-gray-200">
+                                                        {user.name.charAt(0)}
+                                                    </div>
+                                                )}
+                                            </div>
+                                            <div className="ml-4">
+                                                <div className="text-sm font-medium text-gray-900">{user.name}</div>
+                                                <div className="text-sm text-gray-500">{user.email}</div>
+                                            </div>
                                         </div>
-                                        <div className="ml-4">
-                                            <div className="text-sm font-medium text-gray-900">{user.name}</div>
-                                            <div className="text-sm text-gray-500">{user.email}</div>
+                                    </td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                        {user.libraryCardNo || 'N/A'}
+                                    </td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                        {user.department || 'N/A'} / {user.semester || 'N/A'}
+                                    </td>
+                                    <td className={`px-6 py-4 whitespace-nowrap text-sm font-bold ${isExpired ? 'text-red-600' : 'text-gray-500'}`}>
+                                        {user.expiryDate ? new Date(user.expiryDate).toLocaleDateString('en-IN', { month: 'short', year: 'numeric' }) : 'N/A'}
+                                        {isExpired && <span className="block text-[10px] uppercase">Expired</span>}
+                                    </td>
+                                    <td className="px-6 py-4 whitespace-nowrap">
+                                        <span className={`px-3 py-1 inline-flex text-xs leading-5 rounded-full border ${getRoleClasses(user.role)}`}>
+                                            {user.role.toUpperCase()}
+                                        </span>
+                                    </td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium space-y-1 sm:space-y-0 sm:space-x-2 text-center">
+                                        <div className="flex flex-col sm:flex-row justify-center gap-1">
+                                            <button
+                                                onClick={() => { setUserToUpdatePhoto(user); setShowCamera(true); }}
+                                                className="text-blue-600 hover:text-blue-900 bg-blue-100 hover:bg-blue-200 py-1 px-2 rounded-md transition duration-150 text-xs font-bold"
+                                            >
+                                                Camera
+                                            </button>
+                                            <select
+                                                value={user.role}
+                                                onChange={(e) => handleRoleUpdate(user._id, e.target.value, user.name)}
+                                                className="p-1 border border-gray-300 rounded-md focus:ring-red-500 focus:border-red-500 text-sm"
+                                            >
+                                                <option value="student">Student</option>
+                                                <option value="admin">Admin</option>
+                                            </select>
+                                            <button
+                                                onClick={() => handleDelete(user._id, user.name)}
+                                                className="text-red-600 hover:text-red-900 bg-red-100 hover:bg-red-200 py-1 px-2 rounded-md transition duration-150 text-xs font-bold"
+                                                disabled={user.role === 'admin'}
+                                            >
+                                                Delete
+                                            </button>
                                         </div>
-                                    </div>
-                                </td>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                    {user.libraryCardNo || 'N/A'}
-                                </td>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                    {user.department || 'N/A'} / {user.semester || 'N/A'}
-                                </td>
-                                <td className="px-6 py-4 whitespace-nowrap">
-                                    <span className={`px-3 py-1 inline-flex text-xs leading-5 rounded-full border ${getRoleClasses(user.role)}`}>
-                                        {user.role.toUpperCase()}
-                                    </span>
-                                </td>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2 text-center">
-                                    <button
-                                        onClick={() => { setUserToUpdatePhoto(user); setShowCamera(true); }}
-                                        className="text-blue-600 hover:text-blue-900 bg-blue-100 hover:bg-blue-200 py-1 px-2 rounded-md transition duration-150 text-xs font-bold"
-                                    >
-                                        Camera
-                                    </button>
-                                    <select
-                                        value={user.role}
-                                        onChange={(e) => handleRoleUpdate(user._id, e.target.value, user.name)}
-                                        className="p-1 border border-gray-300 rounded-md focus:ring-red-500 focus:border-red-500 text-sm"
-                                    >
-                                        <option value="student">Student</option>
-                                        <option value="admin">Admin</option>
-                                    </select>
-                                    <button
-                                        onClick={() => handleDelete(user._id, user.name)}
-                                        className="text-red-600 hover:text-red-900 bg-red-100 hover:bg-red-200 py-1 px-2 rounded-md transition duration-150 text-xs font-bold"
-                                        disabled={user.role === 'admin'}
-                                    >
-                                        Delete
-                                    </button>
-                                </td>
-                            </tr>
-                        ))}
+                                    </td>
+                                </tr>
+                            );
+                        })}
                     </tbody>
                 </table>
             </div>
@@ -206,15 +227,22 @@ const AdminUserManagement = () => {
                                 audio={false}
                                 ref={webcamRef}
                                 screenshotFormat="image/jpeg"
+                                videoConstraints={videoConstraints}
                                 className="w-full h-auto"
                             />
                         </div>
-                        <div className="flex justify-center gap-4">
+                        <div className="flex justify-center gap-4 flex-wrap">
                             <button
                                 onClick={capture}
                                 className="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-6 rounded-lg transition"
                             >
                                 Capture & Save
+                            </button>
+                            <button
+                                onClick={toggleCamera}
+                                className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-lg transition"
+                            >
+                                Switch Camera
                             </button>
                             <button
                                 onClick={() => { setShowCamera(false); setUserToUpdatePhoto(null); }}

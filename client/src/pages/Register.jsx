@@ -12,18 +12,24 @@ export default function Register() {
         phone: '',
         department: '',
         semester: '',
+        academicSession: '',
         role: 'student',
     });
     const [profilePhoto, setProfilePhoto] = useState(null);
     const [message, setMessage] = useState('');
     const [isCameraOpen, setIsCameraOpen] = useState(false);
+    const [facingMode, setFacingMode] = useState("user");
     const webcamRef = useRef(null);
     const navigate = useNavigate();
+
+    const toggleCamera = () => {
+        setFacingMode(prevMode => prevMode === "user" ? "environment" : "user");
+    };
 
     const videoConstraints = {
         width: 1280,
         height: 720,
-        facingMode: "user"
+        facingMode: facingMode
     };
 
     const capture = useCallback(() => {
@@ -38,6 +44,14 @@ export default function Register() {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        
+        // Academic Session Validation (xxxx-xxxx)
+        const sessionRegex = /^\d{4}-\d{4}$/;
+        if (!sessionRegex.test(formData.academicSession)) {
+            setMessage('Academic Session must follow the format YYYY-YYYY (e.g., 2023-2027)');
+            return;
+        }
+
         if (!profilePhoto) {
             setMessage('Please capture a profile photo.');
             return;
@@ -106,6 +120,13 @@ export default function Register() {
                             </button>
                             <button 
                                 type="button" 
+                                onClick={toggleCamera}
+                                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-bold transition"
+                            >
+                                Switch Camera
+                            </button>
+                            <button 
+                                type="button" 
                                 onClick={() => setIsCameraOpen(false)}
                                 className="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg font-bold transition"
                             >
@@ -165,6 +186,15 @@ export default function Register() {
                     name="semester"
                     placeholder="Semester"
                     value={formData.semester}
+                    onChange={handleChange}
+                    required
+                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-red-500 focus:border-red-500"
+                />
+                <input
+                    type="text"
+                    name="academicSession"
+                    placeholder="Academic Session (e.g., 2023-2027)"
+                    value={formData.academicSession}
                     onChange={handleChange}
                     required
                     className="w-full p-3 border border-gray-300 rounded-lg focus:ring-red-500 focus:border-red-500"
