@@ -7,7 +7,7 @@ const app = express();
 // app.use(cors());
 // // allowed cors https://bbaulibrary.onrender.com
 app.use(cors({
-  origin: ["https://bbaulibrary.onrender.com", "http://localhost:5173", "http://localhost:3000"],
+  origin: ["https://bbaulibrary.onrender.com", "https://bbaulibrary1.onrender.com", "http://localhost:5173", "http://localhost:3000"],
   credentials: true
 }));
 
