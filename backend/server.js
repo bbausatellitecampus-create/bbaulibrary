@@ -37,7 +37,7 @@ app.use("/api/users/register", authLimiter);
 
 // 5. CORS Configuration
 app.use(cors({
-  origin: ["https://bbaulibrary.onrender.com", "http://localhost:5173", "http://localhost:3000"],
+  origin: ["https://bbaulibrary.onrender.com", "https://bbaulibrary-euz3.onrender.com", "http://localhost:5173", "http://localhost:3000"],
   credentials: true
 }));
 
